@@ -57,6 +57,14 @@ export async function processTekkenNotation(
 	// Split the source by commas to handle sequential inputs
 	const moves = source.split(",");
 
+	// Calculate the total width of the canvas
+	const startWidth = 110; // Width of start.png
+	const middleWidth = 50; // Width of middle.png
+	const endWidth = 80; // Width of end.png (adjusted based on your description)
+	const totalMoves = moves.length;
+	const middleImagesNeeded = Math.ceil(totalMoves);
+	const totalWidth = startWidth + middleWidth * middleImagesNeeded + endWidth;
+
 	// Create a canvas element (assuming you know the dimensions of your background)
 	const canvas = document.createElement("canvas");
 	const ctx = canvas.getContext("2d");
@@ -65,8 +73,12 @@ export async function processTekkenNotation(
 		return;
 	}
 
-	canvas.width = 320;
+	canvas.width = totalWidth;
 	canvas.height = 121;
+
+	await drawBackground(ctx, app, totalMoves, startWidth, middleWidth, endWidth);
+
+	let xPos = startWidth;
 
 	try {
 		// Load and draw the background image
@@ -164,4 +176,30 @@ export function loadImage(
 				reject(error);
 			});
 	});
+}
+
+async function drawBackground(
+	ctx: CanvasRenderingContext2D,
+	app: App,
+	totalMoves: number,
+	startWidth: number,
+	middleWidth: number,
+	endWidth: number // Make sure to pass endWidth to the function
+) {
+	// Draw start.png at the beginning
+	const startImage = await loadImage(app, "background/start.png");
+	ctx.drawImage(startImage, 0, 0);
+
+	// Calculate the number of middle images needed
+	const middleImagesNeeded = Math.ceil(totalMoves / 3);
+
+	// Draw middle.png for the calculated number of images needed
+	const middleImage = await loadImage(app, "background/middle3.png");
+	for (let i = 0; i < middleImagesNeeded; i++) {
+		ctx.drawImage(middleImage, startWidth + i * middleWidth, 0);
+	}
+
+	// Draw end.png at the end
+	const endImage = await loadImage(app, "background/end.png");
+	ctx.drawImage(endImage, startWidth + middleImagesNeeded * middleWidth, 0);
 }
