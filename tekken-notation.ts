@@ -54,6 +54,19 @@ export async function processTekkenNotation(
 	el: HTMLElement,
 	app: App
 ) {
+	// New logic to parse "name" from the source
+	let name = "";
+	console.log("Received source:", source);
+
+	if (source.startsWith('"')) {
+		const endIndex = source.indexOf('"', 1);
+		if (endIndex !== -1) {
+			name = source.substring(1, endIndex);
+			source = source.substring(endIndex + 2).trim(); // Assumes a space after the closing quote
+		}
+	}
+	console.log("name:", name);
+
 	// Split the source by commas to handle sequential inputs
 	const moves = source.split(",");
 
@@ -64,6 +77,9 @@ export async function processTekkenNotation(
 	const totalMoves = moves.length;
 	const middleImagesNeeded = Math.ceil(totalMoves);
 	const totalWidth = startWidth + middleWidth * middleImagesNeeded + endWidth;
+
+	const textXPosition = 20;
+	const textYPosition = 35;
 
 	// Create a canvas element (assuming you know the dimensions of your background)
 	const canvas = document.createElement("canvas");
@@ -76,9 +92,14 @@ export async function processTekkenNotation(
 	canvas.width = totalWidth;
 	canvas.height = 121;
 
-	await drawBackground(ctx, app, totalMoves, startWidth, middleWidth, endWidth);
-
-	let xPos = startWidth;
+	await drawBackground(
+		ctx,
+		app,
+		totalMoves,
+		startWidth,
+		middleWidth,
+		endWidth
+	);
 
 	try {
 		// Load and draw the background image
@@ -130,6 +151,13 @@ export async function processTekkenNotation(
 					error
 				);
 			}
+		}
+
+		// Draw the name text if provided
+		if (name) {
+			ctx.font = "bold 24px Verdana"; // Customize the font size and style as needed
+			ctx.fillStyle = "white"; // Set text color
+			ctx.fillText(name, textXPosition, textYPosition);
 		}
 
 		// Convert the canvas to a Data URL and set it as the source for an image element
