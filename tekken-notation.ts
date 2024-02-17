@@ -8,7 +8,8 @@ export const DEFAULT_SETTINGS: MyPluginSettings = {
 	mySetting: "default",
 };
 
-const LEGAL_MOVES = new Set([
+const inputs = new Set([
+	// attacks
 	"1",
 	"2",
 	"3",
@@ -24,9 +25,35 @@ const LEGAL_MOVES = new Set([
 	"1+3+4",
 	"2+3+4",
 	"1+2+3+4",
+	// hold moves
+	"U",
+	"D",
+	"F",
+	"B",
+	"UF",
+	"DF",
+	"UB",
+	"DB",
+	// press moves
+	"u",
+	"d",
+	"f",
+	"b",
+	"uf",
+	"df",
+	"ub",
+	"db",
+	"n",
+	"comboArrow",
+	"[",
+	"]",
 ]);
 
-export async function processTekkenNotation(source: string, el: HTMLElement, app: App) {
+export async function processTekkenNotation(
+	source: string,
+	el: HTMLElement,
+	app: App
+) {
 	// Split the source by commas to handle sequential inputs
 	const moves = source.split(",");
 
@@ -52,15 +79,37 @@ export async function processTekkenNotation(source: string, el: HTMLElement, app
 		// Load and overlay the button images
 		for (const move of moves) {
 			const trimmedMove = move.trim().replace(/\s+/g, "+");
+			let imagePath = "";
 
-			if (!LEGAL_MOVES.has(trimmedMove)) {
-				console.error(`Illegal move: ${trimmedMove}`);
-				continue; // Skip illegal moves
+			// Check if the move is an attack move (contains numbers)
+			if (/\d/.test(trimmedMove)) {
+				imagePath = `/attack-buttons/${trimmedMove}.png`;
+			}
+			// Check if the move is a hold move (capital letter without numbers)
+			else if (/^[A-Z]+$/.test(trimmedMove)) {
+				imagePath = `/hold-direction/${trimmedMove.toLowerCase()}.png`; // Assuming image names are lowercase
+			}
+			// Check if the move is a press move (lowercase letter)
+			else if (/^[a-z]+$/.test(trimmedMove)) {
+				imagePath = `/press-direction/${trimmedMove}.png`;
+			} else if (["-", "[", "]"].includes(trimmedMove)) {
+				// Misc symbols
+				// Assuming misc symbols are stored in a 'misc' directory
+				imagePath = `/misc/${trimmedMove}.png`;
+				// Special handling for misc symbols if necessary
+				// For example, you might want to adjust xPos differently for these symbols,
+				// or they might not correspond to an image at all and instead affect the layout or logic.
+			}
+			// Handle misc moves or provide a default case if needed
+			else {
+				// Example default case (adjust as necessary)
+				console.error(`Unrecognized or misc move: ${trimmedMove}`);
+				continue;
 			}
 
-			const fileName = `/attack-buttons/${trimmedMove}.png`;
+			// Attempt to load and draw the image
 			try {
-				const buttonImage = await loadImage(app, fileName);
+				const buttonImage = await loadImage(app, imagePath);
 				ctx.drawImage(buttonImage, xPos, 0);
 				xPos += 50; // Increment the x position for the next image
 			} catch (error) {
