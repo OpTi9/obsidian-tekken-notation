@@ -85,7 +85,27 @@ function extractNameAndEndText(source: string): NameEndTextSource {
 }
 
 function parseMoves(source: string): string[] {
-	return source.split(",").filter((move) => move.trim() !== "");
+	const shortcuts: { [key: string]: string[] } = {
+		qcf: ["d", "df", "f"],
+		qcb: ["d", "db", "b"],
+		hcf: ["b", "db", "d", "df", "f"],
+		hcb: ["f", "df", "d", "db", "b"],
+	};
+
+	// Split the source string into individual moves
+	let moves = source.split(",").filter((move) => move.trim() !== "");
+
+	// Expand any shortcut inputs into their full sequences
+	moves = moves.flatMap((move) => {
+		move = move.trim();
+		if (Object.hasOwnProperty.call(shortcuts, move)) {
+			return shortcuts[move];
+		} else {
+			return [move];
+		}
+	});
+
+	return moves;
 }
 
 function calculateCanvasDimensions(
@@ -228,7 +248,7 @@ function appendCanvasToElement(el: HTMLElement, canvas: HTMLCanvasElement) {
 function loadImage(app: App, fileName: string): Promise<HTMLImageElement> {
 	return new Promise((resolve, reject) => {
 		// Corrected path that includes the `.obsidian/plugins` segment
-		const filePath = `obsidian-sample-plugin/images/${fileName}`;
+		const filePath = `obsidian-tekken-notation/images/${fileName}`;
 
 		app.vault.adapter
 			.readBinary(`.obsidian/plugins/${filePath}`)
