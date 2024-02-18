@@ -1,10 +1,10 @@
 import { App } from "obsidian";
 
-export interface MyPluginSettings {
+interface MyPluginSettings {
 	mySetting: string;
 }
 
-export const DEFAULT_SETTINGS: MyPluginSettings = {
+const DEFAULT_SETTINGS: MyPluginSettings = {
 	mySetting: "default",
 };
 
@@ -19,23 +19,19 @@ interface NameEndTextSource {
 	modifiedSource: string;
 }
 
-export async function processTekkenNotation(
+async function processTekkenNotation(
 	source: string,
 	el: HTMLElement,
 	app: App
 ) {
 	const { name, endText, modifiedSource } = extractNameAndEndText(source);
-
 	const moves = parseMoves(modifiedSource);
-
 	const canvasDimensions = calculateCanvasDimensions(
 		moves.length,
 		name,
 		endText
 	);
-
 	const canvas = createCanvas(canvasDimensions);
-
 	const ctx = canvas.getContext("2d");
 
 	if (!ctx) {
@@ -44,11 +40,8 @@ export async function processTekkenNotation(
 	}
 
 	await drawBackground(ctx, app, canvasDimensions);
-
 	await drawNameAndEndText(ctx, name, endText, canvasDimensions);
-
 	await drawMoves(ctx, app, moves);
-
 	appendCanvasToElement(el, canvas);
 }
 
@@ -144,7 +137,7 @@ async function drawBackground(
 	const middleImagesCount = Math.floor(totalMiddleWidth / middleWidth);
 
 	// Draw middle sections
-	for (let i = 0; i <= middleImagesCount; i++) {
+	for (let i = 0; i < middleImagesCount; i++) {
 		const middleImage = await loadImage(app, "background/middle.png");
 		const xPos = startWidth + i * middleWidth;
 		ctx.drawImage(middleImage, xPos, 0, middleWidth, height);

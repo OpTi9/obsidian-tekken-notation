@@ -12,7 +12,6 @@ import {
 	MyPluginSettings,
 	DEFAULT_SETTINGS,
 	processTekkenNotation,
-	loadImage,
 } from "./tekken-notation";
 
 export default class MyPlugin extends Plugin {
