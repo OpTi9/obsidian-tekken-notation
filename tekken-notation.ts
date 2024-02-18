@@ -65,40 +65,52 @@ export async function processTekkenNotation(
 	console.log(canvasDimensions);
 	await drawBackground(ctx, app, canvasDimensions);
 
-	await drawMoves(ctx, app, moves);
-
 	if (name) drawTextOnCanvas(ctx, name);
+
+	await drawMoves(ctx, app, moves);
 
 	appendImageToElement(el, canvas);
 }
 
 async function drawMoves(
-    ctx: CanvasRenderingContext2D,
-    app: App,
-    moves: string[]
+	ctx: CanvasRenderingContext2D,
+	app: App,
+	moves: string[]
 ) {
-    let xPos = 0; // Start position for the first move
+	let xPos = 0; // Start position for the first move
 
-    for (let i = 0; i < moves.length; i++) {
-        const move = moves[i].trim();
-        const imagePath = determineImagePathForMove(move);
-        if (!imagePath) continue; // Skip if no image path is determined
+	for (let i = 0; i < moves.length; i++) {
+		const move = moves[i].trim();
+		const imagePath = determineImagePathForMove(move);
+		console.log("imagePath:", imagePath);
+		if (imagePath === null) {
+			drawErrorMessageOnCanvas(ctx, `Invalid: ${move}`);
+			return; // Abort further drawing
+		}
 
-        try {
-            const image = await loadImage(app, imagePath);
-            // Adjust the position only after the first move has been drawn
-            if (i > 0) {
-                // Optionally, xPos could be adjusted dynamically based on the width of each move's image
-                // For example, xPos += image.width; if you want to space images based on their actual width
-                xPos += 50; // Use a fixed increment or calculate based on previous image width
-            }
-            ctx.drawImage(image, xPos, 0); // Draw the image at the current position
-        } catch (error) {
-            console.error(`Error loading image for move: ${move}`, error);
-        }
-    }
+		try {
+			const image = await loadImage(app, imagePath);
+			if (i > 0) {
+				xPos += 50; // Adjust position for subsequent moves
+			}
+			ctx.drawImage(image, xPos, 0); // Draw the image at the current position
+		} catch (error) {
+			drawErrorMessageOnCanvas(ctx, `Invalid: ${move}`);
+			// Optionally, handle error by drawing a generic error message or specific error related to loading images
+			return; // Abort further drawing
+		}
+	}
 }
 
+function drawErrorMessageOnCanvas(
+	ctx: CanvasRenderingContext2D,
+	message: string
+) {
+	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height); // Clear the canvas
+	ctx.font = "bold 17px Arial";
+	ctx.fillStyle = "red";
+	ctx.fillText(message, 10, 50); // Adjust text position as needed
+}
 
 function determineImagePathForMove(move: string) {
 	let imagePath = "";
