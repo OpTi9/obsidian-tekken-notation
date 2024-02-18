@@ -54,123 +54,114 @@ export async function processTekkenNotation(
 	el: HTMLElement,
 	app: App
 ) {
-	// New logic to parse "name" from the source
-	let name = "";
-	console.log("Received source:", source);
+	const { name, modifiedSource } = parseNameFromSource(source);
+	const moves = modifiedSource.split(",");
 
+	const canvasDimensions = calculateCanvasDimensions(moves.length);
+	const canvas = createCanvasElement(canvasDimensions);
+	const ctx = canvas.getContext("2d");
+	if (!ctx) return console.error("Unable to get canvas context");
+
+	console.log(canvasDimensions);
+	await drawBackground(ctx, app, canvasDimensions);
+
+	await drawMoves(ctx, app, moves);
+
+	if (name) drawTextOnCanvas(ctx, name);
+
+	appendImageToElement(el, canvas);
+}
+
+async function drawMoves(
+    ctx: CanvasRenderingContext2D,
+    app: App,
+    moves: string[]
+) {
+    let xPos = 0; // Start position for the first move
+
+    for (let i = 0; i < moves.length; i++) {
+        const move = moves[i].trim();
+        const imagePath = determineImagePathForMove(move);
+        if (!imagePath) continue; // Skip if no image path is determined
+
+        try {
+            const image = await loadImage(app, imagePath);
+            // Adjust the position only after the first move has been drawn
+            if (i > 0) {
+                // Optionally, xPos could be adjusted dynamically based on the width of each move's image
+                // For example, xPos += image.width; if you want to space images based on their actual width
+                xPos += 50; // Use a fixed increment or calculate based on previous image width
+            }
+            ctx.drawImage(image, xPos, 0); // Draw the image at the current position
+        } catch (error) {
+            console.error(`Error loading image for move: ${move}`, error);
+        }
+    }
+}
+
+
+function determineImagePathForMove(move: string) {
+	let imagePath = "";
+
+	// Attack moves: Contain numbers (e.g., "1", "2+3")
+	if (/\d/.test(move)) {
+		imagePath = `/attack-buttons/${move}.png`;
+	}
+	// Hold moves: Capital letters without numbers (e.g., "F", "D")
+	else if (/^[A-Z]+$/.test(move)) {
+		imagePath = `/hold-direction/${move.toLowerCase()}.png`; // Assuming image names are lowercase
+	}
+	// Press moves: Lowercase letters (e.g., "a", "b")
+	else if (/^[a-z]+$/.test(move)) {
+		imagePath = `/press-direction/${move}.png`;
+	}
+	// Misc symbols: "-", "[", "]"
+	else if (["-", "[", "]"].includes(move)) {
+		imagePath = `/misc/${move}.png`;
+	}
+	// Provide a fallback for unrecognized moves, or handle them as needed
+	else {
+		console.warn(`Unrecognized move: ${move}`);
+		// Optionally return a default image path or null if you want to skip drawing
+		// imagePath = `$/misc/default.png`; // Example default path
+		return null; // Skip drawing this move
+	}
+
+	return imagePath;
+}
+
+function parseNameFromSource(source: string) {
+	let name = "";
 	if (source.startsWith('"')) {
 		const endIndex = source.indexOf('"', 1);
 		if (endIndex !== -1) {
 			name = source.substring(1, endIndex);
-			source = source.substring(endIndex + 2).trim(); // Assumes a space after the closing quote
+			source = source.substring(endIndex + 2).trim();
 		}
 	}
-	console.log("name:", name);
+	return { name, modifiedSource: source };
+}
 
-	// Split the source by commas to handle sequential inputs
-	const moves = source.split(",");
+function calculateCanvasDimensions(totalMoves: number) {
+	const startWidth = 110,
+		middleWidth = 50,
+		endWidth = 10;
+	const totalWidth =
+		startWidth + middleWidth * Math.ceil(totalMoves) + endWidth;
+	return { totalWidth, startWidth, middleWidth, endWidth, height: 121 };
+}
 
-	// Calculate the total width of the canvas
-	const startWidth = 110; // Width of start.png
-	const middleWidth = 50; // Width of middle.png
-	const endWidth = 80; // Width of end.png (adjusted based on your description)
-	const totalMoves = moves.length;
-	const middleImagesNeeded = Math.ceil(totalMoves);
-	const totalWidth = startWidth + middleWidth * middleImagesNeeded + endWidth;
-
-	const textXPosition = 20;
-	const textYPosition = 35;
-
-	// Create a canvas element (assuming you know the dimensions of your background)
+function createCanvasElement({
+	totalWidth,
+	height,
+}: {
+	totalWidth: number;
+	height: number;
+}): HTMLCanvasElement {
 	const canvas = document.createElement("canvas");
-	const ctx = canvas.getContext("2d");
-	if (!ctx) {
-		console.error("Unable to get canvas context");
-		return;
-	}
-
 	canvas.width = totalWidth;
-	canvas.height = 121;
-
-	await drawBackground(
-		ctx,
-		app,
-		totalMoves,
-		startWidth,
-		middleWidth,
-		endWidth
-	);
-
-	try {
-		// Load and draw the background image
-		const backgroundImage = await loadImage(app, "background.png");
-		ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
-
-		// Start X position for the first image
-		let xPos = 0;
-
-		// Load and overlay the button images
-		for (const move of moves) {
-			const trimmedMove = move.trim().replace(/\s+/g, "+");
-			let imagePath = "";
-
-			// Check if the move is an attack move (contains numbers)
-			if (/\d/.test(trimmedMove)) {
-				imagePath = `/attack-buttons/${trimmedMove}.png`;
-			}
-			// Check if the move is a hold move (capital letter without numbers)
-			else if (/^[A-Z]+$/.test(trimmedMove)) {
-				imagePath = `/hold-direction/${trimmedMove.toLowerCase()}.png`; // Assuming image names are lowercase
-			}
-			// Check if the move is a press move (lowercase letter)
-			else if (/^[a-z]+$/.test(trimmedMove)) {
-				imagePath = `/press-direction/${trimmedMove}.png`;
-			} else if (["-", "[", "]"].includes(trimmedMove)) {
-				// Misc symbols
-				// Assuming misc symbols are stored in a 'misc' directory
-				imagePath = `/misc/${trimmedMove}.png`;
-				// Special handling for misc symbols if necessary
-				// For example, you might want to adjust xPos differently for these symbols,
-				// or they might not correspond to an image at all and instead affect the layout or logic.
-			}
-			// Handle misc moves or provide a default case if needed
-			else {
-				// Example default case (adjust as necessary)
-				console.error(`Unrecognized or misc move: ${trimmedMove}`);
-				continue;
-			}
-
-			// Attempt to load and draw the image
-			try {
-				const buttonImage = await loadImage(app, imagePath);
-				ctx.drawImage(buttonImage, xPos, 0);
-				xPos += 50; // Increment the x position for the next image
-			} catch (error) {
-				console.error(
-					`Error loading image for move: ${trimmedMove}`,
-					error
-				);
-			}
-		}
-
-		// Draw the name text if provided
-		if (name) {
-			ctx.font = "bold 24px Verdana"; // Customize the font size and style as needed
-			ctx.fillStyle = "white"; // Set text color
-			ctx.fillText(name, textXPosition, textYPosition);
-		}
-
-		// Convert the canvas to a Data URL and set it as the source for an image element
-		const img = document.createElement("img");
-		img.src = canvas.toDataURL();
-		img.alt = "Tekken notation";
-
-		// Clear the element and append the new image
-		el.empty();
-		el.appendChild(img);
-	} catch (error) {
-		console.error("Error loading images:", error);
-	}
+	canvas.height = height;
+	return canvas;
 }
 
 // Utility function to load images
@@ -206,28 +197,60 @@ export function loadImage(
 	});
 }
 
+function drawTextOnCanvas(ctx: CanvasRenderingContext2D, text: string) {
+	ctx.font = "bold 24px Verdana";
+	ctx.fillStyle = "white";
+	ctx.fillText(text, 20, 35); // Consider making these values configurable or calculated
+}
+
+async function appendImageToElement(
+	el: HTMLElement,
+	canvas: HTMLCanvasElement
+) {
+	const img = document.createElement("img");
+	img.src = canvas.toDataURL();
+	img.alt = "Tekken notation";
+	el.empty();
+	el.appendChild(img);
+}
+
 async function drawBackground(
 	ctx: CanvasRenderingContext2D,
 	app: App,
-	totalMoves: number,
-	startWidth: number,
-	middleWidth: number,
-	endWidth: number // Make sure to pass endWidth to the function
+	{
+		totalWidth,
+		height,
+		startWidth,
+		middleWidth,
+		endWidth,
+	}: {
+		totalWidth: number;
+		height: number;
+		startWidth: number;
+		middleWidth: number;
+		endWidth: number;
+	}
 ) {
-	// Draw start.png at the beginning
+	// Draw the start section
 	const startImage = await loadImage(app, "background/start.png");
-	ctx.drawImage(startImage, 0, 0);
+	ctx.drawImage(startImage, 0, 0, startWidth, height);
 
-	// Calculate the number of middle images needed
-	const middleImagesNeeded = Math.ceil(totalMoves / 3);
+	// Calculate the total space available for middle sections
+	const totalMiddleWidth = totalWidth - (startWidth + endWidth);
 
-	// Draw middle.png for the calculated number of images needed
-	const middleImage = await loadImage(app, "background/middle3.png");
-	for (let i = 0; i < middleImagesNeeded; i++) {
-		ctx.drawImage(middleImage, startWidth + i * middleWidth, 0);
+	// Calculate the number of middle images to fit in the available space
+	const middleImagesCount = Math.floor(totalMiddleWidth / middleWidth);
+
+	// Draw middle sections
+	for (let i = 0; i < middleImagesCount; i++) {
+		const middleImage = await loadImage(app, "background/middle.png");
+		const xPos = startWidth + i * middleWidth;
+		ctx.drawImage(middleImage, xPos, 0, middleWidth, height);
 	}
 
-	// Draw end.png at the end
+	// Draw the end section
+	// Adjust the X position of the end image based on the total width of the canvas minus the endWidth
+	const endXPos = totalWidth - endWidth;
 	const endImage = await loadImage(app, "background/end.png");
-	ctx.drawImage(endImage, startWidth + middleImagesNeeded * middleWidth, 0);
+	ctx.drawImage(endImage, endXPos, 0, endWidth, height);
 }
