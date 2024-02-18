@@ -34,6 +34,8 @@ export async function processTekkenNotation(
 		endText
 	);
 
+	console.log("canvasDimensions:", canvasDimensions);
+
 	const canvas = createCanvas(canvasDimensions);
 
 	const ctx = canvas.getContext("2d");
@@ -96,7 +98,8 @@ function calculateCanvasDimensions(
 		endWidth = 10;
 	const nameWidth = estimateTextWidth(name, 22);
 	const endTextWidth = estimateTextWidth(endText, 18);
-	const gap = 100; // Minimum gap between name and endText
+	// Add a gap between name and endText if both are present
+	const gap = endText ? 100 : 0;
 	const movesWidth = middleWidth * Math.ceil(totalMoves);
 
 	// Calculate total width to accommodate name, endText, and the gap between them

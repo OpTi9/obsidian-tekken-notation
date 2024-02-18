@@ -1,7 +1,7 @@
 {
 	"id": "tekken-notation",
 	"name": "Tekken Notation",
-	"version": "0.6.0",
+	"version": "0.6.1",
 	"minAppVersion": "0.15.0",
 	"description": "Demonstrates some of the capabilities of the Obsidian API.",
 	"author": "Obsidian",
