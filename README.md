@@ -19,7 +19,7 @@ f,n,d,df,2
 ```
 ~~~
 
-![](https://i.imgur.com/OKTceN5.png)
+<img src="https://i.imgur.com/OKTceN5.png" width="400">
 
 - adding name:
 to add a name you need to start your notation with "name":
@@ -29,7 +29,7 @@ to add a name you need to start your notation with "name":
 ```
 ~~~
 
-![](https://i.imgur.com/gD8dCph.png)
+<img src="https://i.imgur.com/gD8dCph.png" width="400">
 
 - adding info at the end:
 to add info at the end (ex: damage etc) you need to end your notation with "text":
@@ -39,7 +39,7 @@ to add info at the end (ex: damage etc) you need to end your notation with "text
 ```
 ~~~
 
-![](https://i.imgur.com/eA2l7dh.png)
+<img src="https://i.imgur.com/eA2l7dh.png" width="400">
 
 - adding custom text as input:
 to add custom text as part of the input you need to just write it as text WITHOUT quotes:
@@ -49,7 +49,7 @@ to add custom text as part of the input you need to just write it as text WITHOU
 ```
 ~~~
 
-![](https://i.imgur.com/mgxpkY3.png)
+<img src="https://i.imgur.com/mgxpkY3.png" width="400">
 
 - adding combo arrows / brackets:
 to add combo arrows or brackets:
@@ -59,7 +59,7 @@ to add combo arrows or brackets:
 ```
 ~~~
 
-![](https://i.imgur.com/wfdub4P.png)
+<img src="https://i.imgur.com/wfdub4P.png" width="400">
 
 ## Installation
 `Settings > Community plugins > Community Plugins > Browse` and search for `Tekken Notation`.
