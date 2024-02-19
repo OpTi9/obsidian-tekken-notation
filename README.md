@@ -51,6 +51,16 @@ to add custom text as part of the input you need to just write it as text WITHOU
 
 ![](https://i.imgur.com/mgxpkY3.png)
 
+- adding combo arrows / brackets:
+to add combo arrows or brackets:
+~~~markdown
+```tekken
+1,-,1+2,-,[,3,4,]
+```
+~~~
+
+![](https://imgur.com/a/k9R4DUB)
+
 ## Installation
 `Settings > Community plugins > Community Plugins > Browse` and search for `Tekken Notation`.
 
