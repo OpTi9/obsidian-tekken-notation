@@ -169,10 +169,20 @@ class TekkenNotationSettingTab extends PluginSettingTab {
 
 	// Function to create a Buy Me A Coffee button
 	buyMeACoffeeButton(link: string): HTMLElement {
-		const a = createEl("a");
+		const a = document.createElement("a");
 		a.setAttribute("href", link);
-		a.addClass("buymeacoffee-OpTi9-img");
-		a.innerHTML = `<img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=OpTi9&button_colour=e3e7ef&font_colour=262626&font_family=Poppins&outline_colour=262626&coffee_colour=ff0000" height="30px" width="150px"> `;
+		a.classList.add("buymeacoffee-OpTi9-img");
+
+		const img = document.createElement("img");
+		img.setAttribute(
+			"src",
+			"https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=OpTi9&button_colour=e3e7ef&font_colour=262626&font_family=Poppins&outline_colour=262626&coffee_colour=ff0000"
+		);
+		img.setAttribute("height", "30px");
+		img.setAttribute("width", "150px");
+
+		a.appendChild(img); // Append the image to the link element
+
 		return a;
 	}
 }
