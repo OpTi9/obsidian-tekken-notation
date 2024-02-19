@@ -1,6 +1,6 @@
 {
 	"name": "tekken-notation",
-	"version": "0.9.1",
+	"version": "1.0.0",
 	"description": "This is a Tekken Notation plugin for Obsidian (https://obsidian.md)",
 	"main": "main.js",
 	"scripts": {
