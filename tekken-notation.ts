@@ -1,21 +1,20 @@
 import { App } from "obsidian";
 
-export interface MyPluginSettings {
+export interface TekkenNotationSettings {
 	mySetting: string;
 }
 
-export const DEFAULT_SETTINGS: MyPluginSettings = {
+export const DEFAULT_SETTINGS: TekkenNotationSettings = {
 	mySetting: "default",
 };
 
 interface CanvasDimensions {
 	totalWidth: number;
 	height: number;
-	startWidth: number; // Add this line
-	middleWidth: number; // Add this line
-	endWidth: number; // Add this line
+	startWidth: number;
+	middleWidth: number;
+	endWidth: number;
 }
-
 
 interface NameEndTextSource {
 	name: string;
@@ -131,11 +130,14 @@ async function calculateCanvasDimensions(
 	let movesWidth = 0;
 	for (const [move, isProcessed] of processedMoves) {
 		if (isProcessed) {
-			movesWidth += middleWidth; // Each processed move takes up one middleWidth
+			// if move is [,] or [-], add 25 to the width
+			if (move === "[" || move === "]" || move === "-") {
+				movesWidth += 25;
+			} else movesWidth += middleWidth;
 		} else {
 			// For unprocessed moves, estimate text width and convert to equivalent middleWidths
 			const textWidth = estimateTextWidth(move, 20); // Assuming the same font size as in drawUnrecognizedMoveAsText
-			movesWidth += Math.ceil(textWidth / middleWidth) * middleWidth; // Round up to the nearest middleWidth
+			movesWidth += Math.ceil(textWidth / middleWidth) * middleWidth - 20; // Round up to the nearest middleWidth
 		}
 	}
 
@@ -220,7 +222,7 @@ async function drawMoves(
 	processedMovesPromise: Promise<[string, boolean][]>
 ) {
 	const processedMoves = await processedMovesPromise; // Wait for the promise to resolve
-	let xPos = 0; // Adjusted start position for the first move, assuming some initial offset
+	let xPos = 0; // start position for the first move
 
 	for (const [move, moveProcessed] of processedMoves) {
 		const imagePath = determineImagePathForMove(move);
@@ -229,20 +231,26 @@ async function drawMoves(
 			try {
 				const image = await loadImage(app, imagePath);
 				ctx.drawImage(image, xPos, 0);
-				// if imagePath contains [.png or ].png, then add 25 instead of 50
-				if (imagePath.includes("/[.png") || imagePath.includes("/].png") || imagePath.includes("/-.png")) {
+
+				if (
+					imagePath.includes("/[.png") ||
+					imagePath.includes("/].png") ||
+					imagePath.includes("/-.png")
+				) {
 					xPos += 25;
 				} else {
 					xPos += 50;
 				}
 			} catch (error) {
 				console.error(`Error loading image for move: ${move}`, error);
-				drawErrorMessageOnCanvas(ctx, `Error loading image for move: ${move}`);
+				drawErrorMessageOnCanvas(
+					ctx,
+					`Error loading image for move: ${move}`
+				);
 			}
 		} else {
-			// For unrecognized or failed moves, draw the move as text
+			// For unrecognized moves, draw the move as text
 			drawUnrecognizedMoveAsText(ctx, move, xPos + 50);
-			// Measure the width of the drawn text to update xPos correctly for the next move
 			const textWidth = ctx.measureText(move).width;
 			xPos += textWidth + 30; // Add some padding after the text
 		}
@@ -254,10 +262,10 @@ function drawUnrecognizedMoveAsText(
 	move: string,
 	x: number
 ) {
-	ctx.font = `bold 20px Arial`;
-	ctx.fillStyle = "white"; // Set text color
-	const y = 90; // Fixed y position for drawing text
-	ctx.fillText(move, x, y); // Draw the text
+	ctx.font = `bold 21px Arial`;
+	ctx.fillStyle = "white";
+	const y = 90;
+	ctx.fillText(move, x, y);
 }
 
 async function drawNameAndEndText(
@@ -294,7 +302,6 @@ function appendCanvasToElement(el: HTMLElement, canvas: HTMLCanvasElement) {
 	el.appendChild(img);
 }
 
-// Utility function to load images
 function loadImage(app: App, fileName: string): Promise<HTMLImageElement> {
 	return new Promise((resolve, reject) => {
 		// Corrected path that includes the `.obsidian/plugins` segment
@@ -324,7 +331,6 @@ function loadImage(app: App, fileName: string): Promise<HTMLImageElement> {
 	});
 }
 
-// Utility function to estimate text width based on font size and text length
 function estimateTextWidth(text: string, fontSize: number) {
 	const averageCharacterWidth = fontSize * 0.6; // This factor can be adjusted based on the actual font used
 	return text.length * averageCharacterWidth;
@@ -342,7 +348,7 @@ function determineImagePathForMove(move: string): string {
 	} else if (["-", "[", "]"].includes(move)) {
 		imagePath = `/misc/${move}.png`;
 	} else {
-		return move; // return without any image path
+		return move; // return without any image path if the move is not recognized
 	}
 
 	return imagePath;
@@ -355,7 +361,7 @@ function drawErrorMessageOnCanvas(
 	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height); // Clear the canvas before showing the error
 	ctx.font = "bold 17px Arial";
 	ctx.fillStyle = "red";
-	ctx.fillText(message, 10, 50); // Position the text appropriately
+	ctx.fillText(message, 10, 50); // Position the text
 }
 
 function drawTextOnCanvas(

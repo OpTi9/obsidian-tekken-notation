@@ -9,13 +9,13 @@ import {
 	Setting,
 } from "obsidian";
 import {
-	MyPluginSettings,
+	TekkenNotationSettings,
 	DEFAULT_SETTINGS,
 	processTekkenNotation,
 } from "./tekken-notation";
 
-export default class MyPlugin extends Plugin {
-	settings: MyPluginSettings;
+export default class TekkenNotation extends Plugin {
+	settings: TekkenNotationSettings;
 
 	async onload() {
 		await this.loadSettings();
@@ -75,7 +75,7 @@ export default class MyPlugin extends Plugin {
 		});
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
-		this.addSettingTab(new SampleSettingTab(this.app, this));
+		this.addSettingTab(new TekkenNotationSettingTab(this.app, this));
 
 		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
 		// Using this function will automatically remove the event listener when this plugin is disabled.
@@ -124,10 +124,10 @@ class SampleModal extends Modal {
 	}
 }
 
-class SampleSettingTab extends PluginSettingTab {
-	plugin: MyPlugin;
+class TekkenNotationSettingTab extends PluginSettingTab {
+	plugin: TekkenNotation;
 
-	constructor(app: App, plugin: MyPlugin) {
+	constructor(app: App, plugin: TekkenNotation) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
@@ -138,16 +138,41 @@ class SampleSettingTab extends PluginSettingTab {
 		containerEl.empty();
 
 		new Setting(containerEl)
-			.setName("Setting #1")
-			.setDesc("It's a secret")
-			.addText((text) =>
-				text
-					.setPlaceholder("Enter your secret")
-					.setValue(this.plugin.settings.mySetting)
-					.onChange(async (value) => {
-						this.plugin.settings.mySetting = value;
-						await this.plugin.saveSettings();
-					})
+			.setName("Wiki")
+			.setDesc("Learn more about how to use the Tekken Notation plugin.")
+			.addButton((button) => {
+				button.setButtonText("Open Wiki").onClick(() => {
+					window.open(
+						"https://github.com/OpTi9/obsidian-tekken-notation/wiki",
+						"_blank"
+					);
+				});
+			});
+
+		new Setting(containerEl)
+			.setName("Support")
+			.setDesc(
+				"If you like this Plugin and want to tip the creator, use the button below!"
 			);
+
+		// Instead of adding the button directly to the setting, create a container for custom layout
+		const customContainer = containerEl.createDiv();
+		customContainer.addClass("custom-container"); // Optional: Add a class for potential styling
+
+		// Add the Buy Me A Coffee button to the custom container
+		const buyMeACoffeeLink = "https://www.buymeacoffee.com/OpTi9";
+		const buyMeACoffeeButton = this.buyMeACoffeeButton(buyMeACoffeeLink);
+
+		// Append the button to the custom container
+		customContainer.appendChild(buyMeACoffeeButton);
+	}
+
+	// Function to create a Buy Me A Coffee button
+	buyMeACoffeeButton(link: string): HTMLElement {
+		const a = createEl("a");
+		a.setAttribute("href", link);
+		a.addClass("buymeacoffee-OpTi9-img");
+		a.innerHTML = `<img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=OpTi9&button_colour=e3e7ef&font_colour=262626&font_family=Poppins&outline_colour=262626&coffee_colour=ff0000" height="30px" width="150px"> `;
+		return a;
 	}
 }
