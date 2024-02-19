@@ -55,4 +55,4 @@ to add custom text as part of the input you need to just write it as text WITHOU
 `Settings > Community plugins > Community Plugins > Browse` and search for `Tekken Notation`.
 
 ## Supporting creator
-[Buy me a cofee](https://github.com/OpTi9)
+[Buy me a cofee](https://www.buymeacoffee.com/opti9)
