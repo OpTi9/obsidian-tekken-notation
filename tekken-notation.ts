@@ -11,7 +11,11 @@ export const DEFAULT_SETTINGS: MyPluginSettings = {
 interface CanvasDimensions {
 	totalWidth: number;
 	height: number;
+	startWidth: number; // Add this line
+	middleWidth: number; // Add this line
+	endWidth: number; // Add this line
 }
+
 
 interface NameEndTextSource {
 	name: string;
@@ -33,10 +37,8 @@ export async function processTekkenNotation(
 		moves
 	);
 
-	console.log("processedMoves:", processedMoves);
-
-	const canvasDimensions = calculateCanvasDimensions(
-		moves.length,
+	const canvasDimensions = await calculateCanvasDimensions(
+		processedMoves,
 		name,
 		endText
 	);
@@ -113,21 +115,30 @@ function parseMoves(source: string): string[] {
 	return moves;
 }
 
-function calculateCanvasDimensions(
-	totalMoves: number,
+async function calculateCanvasDimensions(
+	processedMovesPromise: Promise<[string, boolean][]>,
 	name = "",
 	endText = ""
-) {
+): Promise<CanvasDimensions> {
+	const processedMoves = await processedMovesPromise; // Ensure processedMoves is resolved
 	const startWidth = 110,
-		middleWidth = 50,
-		endWidth = 10;
+		endWidth = 10,
+		middleWidth = 50;
 	const nameWidth = estimateTextWidth(name, 22);
 	const endTextWidth = estimateTextWidth(endText, 18);
-	// Add a gap between name and endText if both are present
-	const gap = endText ? 100 : 0;
-	const movesWidth = middleWidth * Math.ceil(totalMoves);
+	const gap = endText ? 30 : 0; // Add a gap between name and endText if both are present
 
-	// Calculate total width to accommodate name, endText, and the gap between them
+	let movesWidth = 0;
+	for (const [move, isProcessed] of processedMoves) {
+		if (isProcessed) {
+			movesWidth += middleWidth; // Each processed move takes up one middleWidth
+		} else {
+			// For unprocessed moves, estimate text width and convert to equivalent middleWidths
+			const textWidth = estimateTextWidth(move, 20); // Assuming the same font size as in drawUnrecognizedMoveAsText
+			movesWidth += Math.ceil(textWidth / middleWidth) * middleWidth; // Round up to the nearest middleWidth
+		}
+	}
+
 	const totalWidth =
 		startWidth + movesWidth + endWidth + nameWidth + endTextWidth + gap;
 
@@ -217,18 +228,23 @@ async function drawMoves(
 		if (moveProcessed) {
 			try {
 				const image = await loadImage(app, imagePath);
-				ctx.drawImage(image, xPos, 0); // Draw the image at the current position
-				xPos += 50; // Move the position for the next move
+				ctx.drawImage(image, xPos, 0);
+				// if imagePath contains [.png or ].png, then add 25 instead of 50
+				if (imagePath.includes("[.png") || imagePath.includes("].png")) {
+					xPos += 25;
+				} else {
+					xPos += 50;
+				}
 			} catch (error) {
 				console.error(`Error loading image for move: ${move}`, error);
-				// Optionally handle any errors that occur during image loading
+				drawErrorMessageOnCanvas(ctx, `Error loading image for move: ${move}`);
 			}
 		} else {
 			// For unrecognized or failed moves, draw the move as text
-			drawUnrecognizedMoveAsText(ctx, move, xPos+50);
+			drawUnrecognizedMoveAsText(ctx, move, xPos + 50);
 			// Measure the width of the drawn text to update xPos correctly for the next move
 			const textWidth = ctx.measureText(move).width;
-			xPos += textWidth+30; // Add some padding after the text
+			xPos += textWidth + 30; // Add some padding after the text
 		}
 	}
 }
