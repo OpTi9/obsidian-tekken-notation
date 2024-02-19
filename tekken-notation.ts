@@ -34,8 +34,6 @@ export async function processTekkenNotation(
 		endText
 	);
 
-	console.log("canvasDimensions:", canvasDimensions);
-
 	const canvas = createCanvas(canvasDimensions);
 
 	const ctx = canvas.getContext("2d");
@@ -110,8 +108,8 @@ function parseMoves(source: string): string[] {
 
 function calculateCanvasDimensions(
 	totalMoves: number,
-	name: string = "",
-	endText: string = ""
+	name = "",
+	endText = ""
 ) {
 	const startWidth = 110,
 		middleWidth = 50,
@@ -123,7 +121,7 @@ function calculateCanvasDimensions(
 	const movesWidth = middleWidth * Math.ceil(totalMoves);
 
 	// Calculate total width to accommodate name, endText, and the gap between them
-	let totalWidth =
+	const totalWidth =
 		startWidth + movesWidth + endWidth + nameWidth + endTextWidth + gap;
 
 	return { totalWidth, startWidth, middleWidth, endWidth, height: 121 };
@@ -190,7 +188,6 @@ async function drawMoves(
 	for (let i = 0; i < moves.length; i++) {
 		const move = moves[i].trim();
 		const imagePath = determineImagePathForMove(move);
-		console.log("imagePath:", imagePath);
 		if (imagePath === null) {
 			drawErrorMessageOnCanvas(ctx, `Invalid: ${move}`);
 			return; // Abort further drawing
