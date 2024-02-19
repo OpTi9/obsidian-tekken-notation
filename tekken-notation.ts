@@ -28,6 +28,13 @@ export async function processTekkenNotation(
 
 	const moves = parseMoves(modifiedSource);
 
+	const processedMoves: Promise<[string, boolean][]> = processMoves(
+		app,
+		moves
+	);
+
+	console.log("processedMoves:", processedMoves);
+
 	const canvasDimensions = calculateCanvasDimensions(
 		moves.length,
 		name,
@@ -47,7 +54,7 @@ export async function processTekkenNotation(
 
 	await drawNameAndEndText(ctx, name, endText, canvasDimensions);
 
-	await drawMoves(ctx, app, moves);
+	await drawMoves(ctx, app, processedMoves);
 
 	appendCanvasToElement(el, canvas);
 }
@@ -127,6 +134,24 @@ function calculateCanvasDimensions(
 	return { totalWidth, startWidth, middleWidth, endWidth, height: 121 };
 }
 
+async function processMoves(
+	app: App,
+	moves: string[]
+): Promise<[string, boolean][]> {
+	const processedMoves: [string, boolean][] = [];
+	for (let i = 0; i < moves.length; i++) {
+		const move = moves[i].trim();
+		const imagePath = determineImagePathForMove(move);
+		try {
+			await loadImage(app, imagePath);
+			processedMoves.push([move, true]);
+		} catch (error) {
+			processedMoves.push([move, false]);
+		}
+	}
+	return processedMoves;
+}
+
 function createCanvas({
 	totalWidth,
 	height,
@@ -181,30 +206,42 @@ async function drawBackground(
 async function drawMoves(
 	ctx: CanvasRenderingContext2D,
 	app: App,
-	moves: string[]
+	processedMovesPromise: Promise<[string, boolean][]>
 ) {
-	let xPos = 0; // Start position for the first move
+	const processedMoves = await processedMovesPromise; // Wait for the promise to resolve
+	let xPos = 0; // Adjusted start position for the first move, assuming some initial offset
 
-	for (let i = 0; i < moves.length; i++) {
-		const move = moves[i].trim();
+	for (const [move, moveProcessed] of processedMoves) {
 		const imagePath = determineImagePathForMove(move);
-		if (imagePath === null) {
-			drawErrorMessageOnCanvas(ctx, `Invalid: ${move}`);
-			return; // Abort further drawing
-		}
 
-		try {
-			const image = await loadImage(app, imagePath);
-			if (i > 0) {
-				xPos += 50; // Adjust position for subsequent moves
+		if (moveProcessed) {
+			try {
+				const image = await loadImage(app, imagePath);
+				ctx.drawImage(image, xPos, 0); // Draw the image at the current position
+				xPos += 50; // Move the position for the next move
+			} catch (error) {
+				console.error(`Error loading image for move: ${move}`, error);
+				// Optionally handle any errors that occur during image loading
 			}
-			ctx.drawImage(image, xPos, 0); // Draw the image at the current position
-		} catch (error) {
-			drawErrorMessageOnCanvas(ctx, `Invalid: ${move}`);
-			// Optionally, handle error by drawing a generic error message or specific error related to loading images
-			return; // Abort further drawing
+		} else {
+			// For unrecognized or failed moves, draw the move as text
+			drawUnrecognizedMoveAsText(ctx, move, xPos+50);
+			// Measure the width of the drawn text to update xPos correctly for the next move
+			const textWidth = ctx.measureText(move).width;
+			xPos += textWidth+30; // Add some padding after the text
 		}
 	}
+}
+
+function drawUnrecognizedMoveAsText(
+	ctx: CanvasRenderingContext2D,
+	move: string,
+	x: number
+) {
+	ctx.font = `bold 20px Arial`;
+	ctx.fillStyle = "white"; // Set text color
+	const y = 90; // Fixed y position for drawing text
+	ctx.fillText(move, x, y); // Draw the text
 }
 
 async function drawNameAndEndText(
@@ -277,7 +314,7 @@ function estimateTextWidth(text: string, fontSize: number) {
 	return text.length * averageCharacterWidth;
 }
 
-function determineImagePathForMove(move: string): string | null {
+function determineImagePathForMove(move: string): string {
 	let imagePath = "";
 
 	if (/\d/.test(move)) {
@@ -289,8 +326,7 @@ function determineImagePathForMove(move: string): string | null {
 	} else if (["-", "[", "]"].includes(move)) {
 		imagePath = `/misc/${move}.png`;
 	} else {
-		console.warn(`Unrecognized move: ${move}`);
-		return null; // Skip drawing this move
+		return move; // return without any image path
 	}
 
 	return imagePath;
