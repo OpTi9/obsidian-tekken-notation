@@ -59,7 +59,7 @@ to add combo arrows or brackets:
 ```
 ~~~
 
-![](https://imgur.com/a/k9R4DUB)
+![](https://i.imgur.com/wfdub4P.png)
 
 ## Installation
 `Settings > Community plugins > Community Plugins > Browse` and search for `Tekken Notation`.
