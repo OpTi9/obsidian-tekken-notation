@@ -2,7 +2,7 @@
 
 Render [Tekken Notation](https://tekken.fandom.com/wiki/Move_Terminology) Diagrams in [Obsidian](https://obsidian.md)
 
-![Demonstration](https://drive.google.com/file/d/1VczBsx-NiQDJjY2i6IP4zMM8IUm9_HiO/view?usp=sharing)
+![Demonstration](https://i.imgur.com/hCePE7w.gif)
 
 ## Usage
 Create a fenced codeblock using `tekken` as the language.
@@ -20,7 +20,7 @@ f,n,d,df,2
 ~~~
 
 results in:
-![](https://drive.google.com/file/d/1nCLBPmVPhfChz1jJLBMtipN5ZjwWl2G7/view?usp=sharing)
+![](https://i.imgur.com/OKTceN5.png)
 
 - adding name:
 to add a name you need to start your notation with "name",
@@ -31,7 +31,7 @@ to add a name you need to start your notation with "name",
 ~~~
 
 results in:
-![](https://drive.google.com/file/d/198kYu6br6DX9-pXz5Df5R48U2KRyKrau/view?usp=sharing)
+![](https://i.imgur.com/gD8dCph.png)
 
 - adding info at the end:
 to add info at the end (ex: damage etc) you need to end your notation with "text",
@@ -42,7 +42,7 @@ to add info at the end (ex: damage etc) you need to end your notation with "text
 ~~~
 
 results in:
-![](https://drive.google.com/file/d/1NMXZyTZ47frxOFw4uBzBQZ3WQw1hs6Ai/view?usp=sharing)
+![](https://i.imgur.com/eA2l7dh.png)
 
 - adding custom text as input:
 to add custom text as part of the input you need to just write it as text WITHOUT quotes,
@@ -53,7 +53,7 @@ to add custom text as part of the input you need to just write it as text WITHOU
 ~~~
 
 results in:
-![](https://drive.google.com/file/d/1OmNbJD8cqlBBt9XUps4mjVHqbx0654Ow/view?usp=sharing)
+![](https://i.imgur.com/mgxpkY3.png)
 
 ## Installation
 `Settings > Community plugins > Community Plugins > Browse` and search for `Tekken Notation`.
