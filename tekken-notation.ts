@@ -230,7 +230,7 @@ async function drawMoves(
 				const image = await loadImage(app, imagePath);
 				ctx.drawImage(image, xPos, 0);
 				// if imagePath contains [.png or ].png, then add 25 instead of 50
-				if (imagePath.includes("[.png") || imagePath.includes("].png")) {
+				if (imagePath.includes("/[.png") || imagePath.includes("/].png") || imagePath.includes("/-.png")) {
 					xPos += 25;
 				} else {
 					xPos += 50;
