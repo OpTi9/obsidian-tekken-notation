@@ -19,7 +19,6 @@ f,n,d,df,2
 ```
 ~~~
 
-results in:
 ![](https://i.imgur.com/OKTceN5.png)
 
 - adding name:
@@ -30,7 +29,6 @@ to add a name you need to start your notation with "name",
 ```
 ~~~
 
-results in:
 ![](https://i.imgur.com/gD8dCph.png)
 
 - adding info at the end:
@@ -41,7 +39,6 @@ to add info at the end (ex: damage etc) you need to end your notation with "text
 ```
 ~~~
 
-results in:
 ![](https://i.imgur.com/eA2l7dh.png)
 
 - adding custom text as input:
@@ -52,7 +49,6 @@ to add custom text as part of the input you need to just write it as text WITHOU
 ```
 ~~~
 
-results in:
 ![](https://i.imgur.com/mgxpkY3.png)
 
 ## Installation
