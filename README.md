@@ -22,7 +22,7 @@ f,n,d,df,2
 ![](https://i.imgur.com/OKTceN5.png)
 
 - adding name:
-to add a name you need to start your notation with "name",
+to add a name you need to start your notation with "name":
 ~~~markdown
 ```tekken
 "EWGF",f,n,d,df,2
@@ -32,7 +32,7 @@ to add a name you need to start your notation with "name",
 ![](https://i.imgur.com/gD8dCph.png)
 
 - adding info at the end:
-to add info at the end (ex: damage etc) you need to end your notation with "text",
+to add info at the end (ex: damage etc) you need to end your notation with "text":
 ~~~markdown
 ```tekken
 "EWGF",f,n,d,df,2,"50 damage"
@@ -42,7 +42,7 @@ to add info at the end (ex: damage etc) you need to end your notation with "text
 ![](https://i.imgur.com/eA2l7dh.png)
 
 - adding custom text as input:
-to add custom text as part of the input you need to just write it as text WITHOUT quotes,
+to add custom text as part of the input you need to just write it as text WITHOUT quotes:
 ~~~markdown
 ```tekken
 "EWGF",f,n,d,df,2,same frame input,"50 damage"
@@ -53,3 +53,6 @@ to add custom text as part of the input you need to just write it as text WITHOU
 
 ## Installation
 `Settings > Community plugins > Community Plugins > Browse` and search for `Tekken Notation`.
+
+## Supporting creator
+[Buy me a cofee](https://github.com/OpTi9)
