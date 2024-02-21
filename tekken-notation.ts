@@ -298,19 +298,24 @@ function appendCanvasToElement(el: HTMLElement, canvas: HTMLCanvasElement) {
 	const img = document.createElement("img");
 	img.src = canvas.toDataURL("image/png");
 	img.alt = "Tekken notation visualization";
-	el.innerHTML = ""; // Clear existing content
+	// Clear existing content
+	while (el.firstChild) {
+		el.removeChild(el.firstChild);
+	}
+
 	el.appendChild(img);
 }
 
 function loadImage(app: App, fileName: string): Promise<HTMLImageElement> {
 	return new Promise((resolve, reject) => {
-		// Corrected path that includes the `.obsidian/plugins` segment
-		const filePath = `obsidian-tekken-notation/images/${fileName}`;
+		// Use Vault#configDir to get the current configuration directory
+		const configDir = app.vault.configDir;
+		const filePath = `${configDir}/plugins/obsidian-tekken-notation/images/${fileName}`;
 
 		app.vault.adapter
-			.readBinary(`.obsidian/plugins/${filePath}`)
+			.readBinary(filePath)
 			.then((data) => {
-				const blob = new Blob([data], { type: "image/png" }); // Assuming PNG images
+				const blob = new Blob([data], { type: "image/png" });
 				const url = URL.createObjectURL(blob);
 
 				const img = new Image();
